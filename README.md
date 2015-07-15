@@ -1,14 +1,14 @@
 # Mysql主从复制配置
 
 ------
-### master主服务器配置
+### Mysql主服务器(master)配置
 
 ###### 1、master主服务器设置复制账号
 ```
 # REPLICATION SLAVE ON *.* TO '帐号'@'从服务器IP' IDENTIFIED BY '密码';
 mysql> GRANT REPLICATION SLAVE ON *.* TO slave@'%' IDENTIFIED BY '123456';
 ```
-`注`:线上配置已经要有更严格的权限控制(限制访问特定库，特定ip访问)
+`注`:线上配置一定要有更严格的权限控制(限制访问特定库，特定ip访问)
 
 ###### 2、配置master数据库 `my.cnf`
 ```
@@ -39,17 +39,18 @@ pid-file=/var/run/mysqld/mysqld.pid
 
 ###### 3、导出mysql
 
-关闭所有数据库的所有表并申请一个全局的读锁，防止写数据。
+a、关闭所有数据库的所有表并申请一个全局的读锁，防止写数据。
 ```
 mysql> FLUSH TABLES WITH READ LOCK;
 ```
 
-新开一个终端，导出数据库
+b、新开一个终端，导出数据库
 ```
 # mysqldump -u root -p database_name>/root/test.sql
 ```
 
-查看mysql master状态并解锁
+c、查看mysql master状态并解锁
+```
 mysql> show master status\G
 *************************** 1. row ***************************
             File: mysql-bin.000003
