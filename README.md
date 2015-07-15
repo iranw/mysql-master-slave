@@ -1,6 +1,6 @@
 # Mysql主从复制配置
 
-------
+
 ### Mysql主服务器(master)配置
 
 ###### 1、master主服务器设置复制账号
@@ -63,15 +63,27 @@ mysql> unlock tables;
 `注`:记录上面SHOW MASTER STATUS输出的`File`和`Position`，并在从服务器上用CHANGE MASTER TO配置主服务器即可。
 
 ------
-### slave服务器配置
+------
+### Mysql从服务器(slave)配置
 
-###### 3、配置slave服务器`my.cnf`
+###### 1、将主数据库数据导入到从库
 
+创建需要主从的数据库
+```
+mysql> CREATE DATABASE IF NOT EXISTS test DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+```
 
+将主库dumpmysql的数据导入到新建的数据库里面
+```
+# mysql -h localhost -uroot -p密码 test</root/test.sql
+```
+or
+```
+mysql> use test;
+mysql> source /home/vagrant/test.sql;
+```
 
-
-
-###### 配置slave服务器`my.cnf`
+###### 2、配置slave服务器`my.cnf`
 ```
 [vagrant@localhost ~]$ cat /etc/my.cnf 
 [mysqld]
@@ -97,12 +109,46 @@ expire-logs-days=7
 #在从库开启该选项，避免在从库上进行写操作，导致主从数据不一致（对super权限无效）
 read-only=1
 
-
 [mysqld_safe]
 log-error=/var/log/mysqld.log
 pid-file=/var/run/mysqld/mysqld.pid
 [vagrant@localhost ~]$
 ```
-`注`:read-only = 1 这个选项对于root用户无效，root用户照样可以执行插入更新的操作。
+`注`:read-only = 1 在从库开启该选项，避免在从库上进行写操作，导致主从数据不一致(对super权限无效)
 
-###### 配置master信息
+###### 3、配置链接
+```
+mysql> slave stop;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> change master to 
+    -> MASTER_HOST='172.16.1.201',          // 主服务器的IP地址
+    -> MASTER_USER='slave',                 // 同步数据库的用户
+    -> MASTER_PASSWORD='123456',            // 同步数据库的密码
+    -> MASTER_CONNECT_RETRY=60,             // 如果从服务器发现主服务器断掉，重新连接的时间差(秒)
+    -> MASTER_LOG_FILE='mysql-bin.000003',  // 主服务器二进制日志的文件名(前面要求记住的 File 参数)
+    -> MASTER_LOG_POS=565;                  // 日志文件的开始位置(前面要求记住的 Position 参数)
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> slave start;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql>
+```
+
+###### 4、重启从服务器slave
+```
+$ sudo /etc/init.d/mysqld restart
+```
+
+###### 5、查看从服务器状态
+```
+mysql> show slave status\G;
+```
+`注`:注意一定要有下面两项，没有的话查看错误日志(less /var/log/mysqld.log)
+```
+Slave_IO_Running: Yes
+Slave_SQL_Running: Yes
+```
+
+
