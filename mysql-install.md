@@ -14,7 +14,7 @@
 
 ###### 3、初始化mysql
 ```
-#//usr/bin/mysql_secure_installation    #重置密码与上一步操作重复，可忽略。其他选项建议全部为Y
+#/usr/bin/mysql_secure_installation    #重置密码与上一步操作重复，可忽略。其他选项建议全部为Y
 ```
 
 ###### 4、操作mysql
@@ -23,7 +23,7 @@
 #sudo service mysqld {start|stop|status|restart|condrestart|try-restart|reload|force-reload}
 ```
 
-###### 4、常用命令
+###### 常用命令
 ```
 #创建数据库
 > CREATE DATABASE test DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci; 
