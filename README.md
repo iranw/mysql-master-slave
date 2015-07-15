@@ -46,7 +46,7 @@ mysql> FLUSH TABLES WITH READ LOCK;
 
 b、新开一个终端，导出数据库
 ```
-# mysqldump -u root -p database_name>/root/test.sql
+# mysqldump --master-data -u root -p database_name>/root/test.sql
 ```
 
 c、查看mysql master状态并解锁
@@ -62,28 +62,16 @@ mysql> unlock tables;
 ```
 `注`:记录上面SHOW MASTER STATUS输出的`File`和`Position`，并在从服务器上用CHANGE MASTER TO配置主服务器即可。
 
+d、重启mysql服务器
+```
+$sudo /etc/init.d/mysqld restart
+```
+
 ------
 ------
 ### Mysql从服务器(slave)配置
 
-###### 1、将主数据库数据导入到从库
-
-创建需要主从的数据库
-```
-mysql> CREATE DATABASE IF NOT EXISTS test DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
-```
-
-将主库dumpmysql的数据导入到新建的数据库里面
-```
-# mysql -h localhost -uroot -p密码 test</root/test.sql
-```
-or
-```
-mysql> use test;
-mysql> source /home/vagrant/test.sql;
-```
-
-###### 2、配置slave服务器`my.cnf`
+###### 1、配置slave服务器`my.cnf`
 ```
 [vagrant@localhost ~]$ cat /etc/my.cnf 
 [mysqld]
@@ -116,11 +104,30 @@ pid-file=/var/run/mysqld/mysqld.pid
 ```
 `注`:read-only = 1 在从库开启该选项，避免在从库上进行写操作，导致主从数据不一致(对super权限无效)
 
-###### 3、配置链接
+###### 2、关闭主从功能
 ```
 mysql> slave stop;
-Query OK, 0 rows affected (0.00 sec)
+```
 
+###### 3、将主数据库数据导入到从库
+
+创建需要主从的数据库
+```
+mysql> CREATE DATABASE IF NOT EXISTS test DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+```
+
+将主库dumpmysql的数据导入到新建的数据库里面
+```
+# mysql -h localhost -uroot -p密码 test</root/test.sql
+```
+or
+```
+mysql> use test;
+mysql> source /home/vagrant/test.sql;
+```
+
+###### 4、配置链接
+```
 mysql> change master to 
     -> MASTER_HOST='172.16.1.201',          // 主服务器的IP地址
     -> MASTER_USER='slave',                 // 同步数据库的用户
@@ -129,19 +136,19 @@ mysql> change master to
     -> MASTER_LOG_FILE='mysql-bin.000003',  // 主服务器二进制日志的文件名(前面要求记住的 File 参数)
     -> MASTER_LOG_POS=565;                  // 日志文件的开始位置(前面要求记住的 Position 参数)
 Query OK, 0 rows affected (0.00 sec)
-
-mysql> slave start;
-Query OK, 0 rows affected (0.00 sec)
-
-mysql>
 ```
 
-###### 4、重启从服务器slave
+###### 5、启动主从
+```
+mysql> slave start;
+```
+
+###### 6、重启从服务器slave
 ```
 $ sudo /etc/init.d/mysqld restart
 ```
 
-###### 5、查看从服务器状态
+###### 7、查看从服务器状态
 ```
 mysql> show slave status\G;
 ```
@@ -151,4 +158,4 @@ Slave_IO_Running: Yes
 Slave_SQL_Running: Yes
 ```
 
-
+---配置结束---
