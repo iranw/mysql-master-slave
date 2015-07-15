@@ -10,7 +10,7 @@ mysql> GRANT REPLICATION SLAVE ON *.* TO slave@'%' IDENTIFIED BY '123456';
 ```
 `注`:线上配置一定要有更严格的权限控制(限制访问特定库，特定ip访问)
 
-###### 2、配置master数据库 `my.cnf`
+###### 2、配置master数据库 `my.cnf` 并重启
 ```
 [vagrant@localhost ~]$ sudo vim /etc/my.cnf 
 [mysqld]
@@ -37,6 +37,11 @@ log-error=/var/log/mysqld.log
 pid-file=/var/run/mysqld/mysqld.pid
 ```
 
+```
+$sudo /etc/init.d/mysqld restart
+```
+
+
 ###### 3、导出mysql
 
 a、关闭所有数据库的所有表并申请一个全局的读锁，防止写数据。
@@ -58,9 +63,13 @@ mysql> show master status\G
     Binlog_Do_DB: test
 Binlog_Ignore_DB: mysql,information_schema
 1 row in set (0.00 sec)
-mysql> unlock tables;
 ```
 `注`:记录上面SHOW MASTER STATUS输出的`File`和`Position`，并在从服务器上用CHANGE MASTER TO配置主服务器即可。
+
+解锁
+```
+mysql> unlock tables;
+```
 
 d、重启mysql服务器
 ```
@@ -71,7 +80,7 @@ $sudo /etc/init.d/mysqld restart
 ------
 ### Mysql从服务器(slave)配置
 
-###### 1、配置slave服务器`my.cnf`
+###### 1、配置slave服务器`my.cnf` 并重启
 ```
 [vagrant@localhost ~]$ cat /etc/my.cnf 
 [mysqld]
@@ -103,6 +112,10 @@ pid-file=/var/run/mysqld/mysqld.pid
 [vagrant@localhost ~]$
 ```
 `注`:read-only = 1 在从库开启该选项，避免在从库上进行写操作，导致主从数据不一致(对super权限无效)
+
+```
+$sudo /etc/init.d/mysqld restart
+```
 
 ###### 2、关闭主从功能
 ```
