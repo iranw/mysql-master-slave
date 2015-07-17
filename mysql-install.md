@@ -45,6 +45,34 @@
 mysql> CREATE DATABASE IF NOT EXISTS test DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
 ```
 
+查看数据库变量设置
+```
+mysql> show variables;
+mysql> show variables like "%log%";
+```
+
+开启mysql5.6 general_log日志
+```
+# 修改/etc/my.cnf 在mysqld里添加变量
+[vagrant@localhost ~]$ cat /etc/my.cnf
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+
+# Recommended in standard MySQL setup
+sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES 
+
+general_log=1
+general_log_file=/var/lib/mysql/query.log
+
+[mysqld_safe]
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid
+[vagrant@localhost ~]$
+```
 
 ------
 `注`:强大的`mysql`备份工具`Xtrabackup`分享
