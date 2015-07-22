@@ -21,6 +21,10 @@ user=mysql
 symbolic-links=0
 # 开启mysql二进制日志
 log-bin=mysql-bin
+# L磁盘写入策略 (合理运用)
+innodb_flush_log_at_trx_commit=1
+# 同步到磁盘的频率 (合理运用)
+sync_binlog=1
 # 设置服务器ID
 server-id=1
 # 设置需要做主从复制的数据库名字 多个数据库可以设置多行 也可以设置到单行
@@ -80,7 +84,12 @@ $sudo /etc/init.d/mysqld restart
 ------
 ### Mysql从服务器(slave)配置
 
-###### 1、配置slave服务器`my.cnf` 并重启
+###### 1、先关闭从库复制
+```
+mysql> stop slave;
+```
+
+###### 2、配置slave服务器`my.cnf` 并重启
 ```
 [vagrant@localhost ~]$ cat /etc/my.cnf 
 [mysqld]
@@ -115,11 +124,6 @@ pid-file=/var/run/mysqld/mysqld.pid
 
 ```
 $sudo /etc/init.d/mysqld restart
-```
-
-###### 2、关闭主从功能
-```
-mysql> slave stop;
 ```
 
 ###### 3、将主数据库数据导入到从库

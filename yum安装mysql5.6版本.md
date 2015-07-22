@@ -37,12 +37,12 @@ Description : ......
 
 启动mysql
 ```
-#sudo /etc/init.d/mysql start
+#sudo /etc/init.d/mysqld start
 ```
 
 ### 3、初始化mysql
 ```
-/usr/bin/mysqladmin -u root password '123456'
+#/usr/bin/mysqladmin -u root password '123456'
 #/usr/bin/mysql_secure_installation    #重置密码与上一步操作重复，可忽略。其他选项建议全部为Y
 ```
 

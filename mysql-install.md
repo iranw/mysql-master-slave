@@ -51,6 +51,22 @@ mysql> show variables;
 mysql> show variables like "%log%";
 ```
 
+查看binlog
+```
+mysql> show master logs;
+```
+
+查看特定binlog内容
+```
+mysql> mysql> show binlog events in "mysql-bin.000001";
+mysql> show binlog events in "mysql-bin.000001" limit 1,3/* 查看特定行 */;
+```
+
+删除所有binlog
+```
+mysql> reset master;
+```
+
 开启mysql5.6 general_log日志
 ```
 # 修改/etc/my.cnf 在mysqld里添加变量
