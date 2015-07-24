@@ -92,3 +92,4 @@ pid-file=/var/run/mysqld/mysqld.pid
 
 ------
 `注`:强大的`mysql`备份工具`Xtrabackup`分享
+`注`:mysql性能测试工具 `sysbench`
